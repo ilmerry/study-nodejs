@@ -6,10 +6,10 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type' : 'text/html; charset=utf-8'});
         const data = await fs.readFile('./server2.html');
         res.end(data);
-    } catch {
-        console.error(err);
+    } catch(error) {
+        console.error(error);
         res.writeHead(200, { 'Content-Type' : 'text/plain; charset=utf-8'});
-        res.end(err.message);
+        res.end(error.message);
     }
 })
     .listen(8080);
