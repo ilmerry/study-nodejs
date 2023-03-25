@@ -1,20 +1,43 @@
 import { Request, Response } from "express";
+import { validationResult } from "express-validator";
+import { rm, sc } from "../constants";
+import { fail, success } from "../constants/response";
+import { UserCreateDTO } from "../interfaces/UserCreateDTO";
+import jwtHandler from "../modules/jwtHandler";
 import { userService } from "../service";
 
 //* 유저 생성
 const createUser = async (req: Request, res: Response) => {
-  const { name, age, email } = req.body;
+  //? validation의 결과를 바탕으로 분기 처리
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res
+      .status(sc.BAD_REQUEST)
+      .send(fail(sc.BAD_REQUEST, rm.BAD_REQUEST));
+  }
 
-  // db통신은 여기에서 적는 게 아님. 창고에 저장만 하는 역할
-  const data = await userService.createUser(name, age, email);
+  //? 기존 비구조화 할당 방식 -> DTO의 형태
+  const userCreateDto: UserCreateDTO = req.body;
+  const data = await userService.createUser(userCreateDto);
 
   if (!data) {
-    return res.status(400).json({ status: 400, message: "유저 생성 실패" });
-  } else {
     return res
-      .status(200)
-      .json({ status: 200, message: "유저 생성 성공", data });
+      .status(sc.BAD_REQUEST)
+      .send(fail(sc.BAD_REQUEST, rm.SIGNUP_FAIL));
   }
+
+  //? 아까 만든 jwtHandler 내 sign 함수를 이용해 accessToken 생성
+  const accessToken = jwtHandler.sign(data.id);
+
+  const result = {
+    id: data.id,
+    name: data.name,
+    accessToken,
+  };
+
+  return res
+    .status(sc.CREATED)
+    .send(success(sc.CREATED, rm.SIGNUP_SUCCESS, result));
 };
 
 //* 유저 전체 조회

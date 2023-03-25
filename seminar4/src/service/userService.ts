@@ -1,15 +1,20 @@
 import { PrismaClient } from "@prisma/client";
+import { genSalt, hash } from "bcryptjs";
+import { UserCreateDTO } from "../interfaces/UserCreateDTO";
 const prisma = new PrismaClient();
 
 //* 유저 생성
-const createUser = async (name: string, age: number, email: string) => {
-  // prisma 사용해서 디비에 정보 저장
-  // 프리즈마는 기본적으로 promise 방식임
+const createUser = async (userCreateDto: UserCreateDTO) => {
+  //? 넘겨받은 password를 bcrypt의 도움을 받아 암호화
+  const salt = await genSalt(10); //^ 매우 작은 임의의 랜덤 텍스트 salt
+  const password = await hash(userCreateDto.password, salt); //^ 위에서 랜덤을 생성한 salt를 이용해 암호화
+
   const data = await prisma.user.create({
     data: {
-      name,
-      age,
-      email,
+      name: userCreateDto?.name,
+      age: userCreateDto?.age,
+      email: userCreateDto.email,
+      password,
     },
   });
 

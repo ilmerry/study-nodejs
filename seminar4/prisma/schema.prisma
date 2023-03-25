@@ -12,4 +12,5 @@ model User {
   name  String
   age   Int?
   email String? @db.VarChar(400)
+  password String @db.VarChar(400)
 }
