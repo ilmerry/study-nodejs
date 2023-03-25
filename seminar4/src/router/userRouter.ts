@@ -29,4 +29,16 @@ router.delete("/:userId", userController.deleteUser);
 
 router.get("/:userId", auth, userController.getUserById);
 
+//* 로그인 - POST api/user/signin
+router.post(
+  "/signin",
+  [
+    body("email").notEmpty(),
+    body("email").isEmail(),
+    body("password").notEmpty(),
+    body("password").isLength({ min: 6 }),
+  ],
+  userController.signInUser
+);
+
 export default router;

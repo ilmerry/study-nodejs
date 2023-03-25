@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { genSalt, hash } from "bcryptjs";
+import { compare, genSalt, hash } from "bcryptjs";
+import { sc } from "../constants";
 import { UserCreateDTO } from "../interfaces/UserCreateDTO";
+import { UserSignInDTO } from "../interfaces/UserSignInDTO";
 const prisma = new PrismaClient();
 
 //* 유저 생성
@@ -68,12 +70,35 @@ const getUserById = async (userId: number) => {
   return user;
 };
 
+//* 로그인
+const signIn = async (userSignInDto: UserSignInDTO) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: userSignInDto.email,
+      },
+    });
+    if (!user) return null;
+
+    //? bcrypt가 DB에 저장된 기존 password와 넘겨 받은 password를 대조하고,
+    //? match false시 401을 리턴
+    const isMatch = await compare(userSignInDto.password, user.password);
+    if (!isMatch) return sc.UNAUTHORIZED;
+
+    return user.id;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 const userService = {
   createUser,
   getAllUser,
   updateUser,
   deleteUser,
   getUserById,
+  signIn,
 };
 
 export default userService;
