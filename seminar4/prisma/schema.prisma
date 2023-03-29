@@ -8,9 +8,17 @@ datasource db {
 }
 
 model User {
-  id    Int     @id(map: "User_pk") @unique(map: "User_pk2") @default(autoincrement())
-  name  String
-  age   Int?
-  email String? @db.VarChar(400)
-  password String @db.VarChar(400)
+  id       Int     @id(map: "User_pk") @unique(map: "User_pk2") @default(autoincrement())
+  name     String
+  age      Int?
+  email    String? @db.VarChar(400)
+  password String  @db.VarChar(400)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Image {
+  id    Int @id(map: "Image_pk") @unique(map: "Image_pk2") @default(autoincrement())
+  image String? @db.VarChar(800)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 }
